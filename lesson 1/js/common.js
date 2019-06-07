@@ -1,0 +1,1 @@
+let budjet = prompt()
