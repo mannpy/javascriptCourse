@@ -1,6 +1,7 @@
-import {show, hide, addSliderElements, removeSliderElements} from './modules/helpers';
 import elections from './modules/objects';
 import createSlider from './modules/slider';
+import {show, hide, addSliderElements, removeSliderElements} from './modules/helpers';
+import {resetResults, voting, crime} from './modules/elections';
 
 window.addEventListener('DOMContentLoaded', function() {
   const mainBlock = document.querySelector('.main'),
@@ -24,12 +25,13 @@ window.addEventListener('DOMContentLoaded', function() {
         votingBtn = document.querySelector('#voting'),
         crimeBtn = document.querySelector('#crime');
         
-
+  // set person apperance
   elections.person.skin = document.querySelector('.person-skin');
   elections.person.hair = document.querySelector('.person-hair');
   elections.person.clothes = document.querySelector('.person-clothes');
  
-  function changePicsInit(sex) {
+  function changePersonAppearance(sex) {
+    // change images according sex value
     if (sex == "Мужской") {
       elections.person.skin.style.background = elections.pictures.skin.men[0];
       elections.person.hair.style.background = elections.pictures.hair.men[0];
@@ -43,105 +45,86 @@ window.addEventListener('DOMContentLoaded', function() {
 
   function slider() {
     let checkedSex = document.querySelector('input[name=sex]:checked');
+    // update value
     elections.person.sex = checkedSex.value;
+    // hair
     addSliderElements(elections.sliders.hair.block, checkedSex.value, 'hair-style hair-style-');
     elections.sliders.hair.slides = document.querySelectorAll('.hair .hair-style');
-    
+    // clothes
     addSliderElements(elections.sliders.clothes.block, checkedSex.value, 'clothes-style clothes-style-');
     elections.sliders.clothes.slides = document.querySelectorAll('.clothes .clothes-style');
-    
+    // show first slide
     elections.sliders.hair.slides[0].style.display = "block";
     elections.sliders.clothes.slides[0].style.display = "block";
 
-    changePicsInit(checkedSex.value);
-
+    // change img if sex changed
+    changePersonAppearance(checkedSex.value);
+    // activate slider
     createSlider(elections.sliders);
   }
   
-  slider();
 
-  function changeBody (sex) {
+  function changeBody () {
+    /* listen sex value changing */
     sex.forEach((elem) => {
       elem.addEventListener('change', () => {
+        // first remove all slides
         removeSliderElements(elections.sliders.hair.block, 'hair-style');
         removeSliderElements(elections.sliders.clothes.block, 'clothes-style');
         if (elem.checked) {
           elections.person.sex = elem.value;
-
+          // add new slides according sex value
           addSliderElements(elections.sliders.hair.block, elem.value, 'hair-style hair-style-');
           addSliderElements(elections.sliders.clothes.block, elem.value, 'clothes-style clothes-style-');
-          if (elem.value == "Мужской") {
-            elections.sliders.hair.slides = document.querySelectorAll('.hair .hair-style');
-            elections.sliders.hair.slides[0].style.display = "block";
-
-            elections.sliders.clothes.slides = document.querySelectorAll('.clothes .clothes-style');
-            elections.sliders.clothes.slides[0].style.display = "block";
-          } else if (elem.value == "Женский") {
-            elections.sliders.hair.slides = document.querySelectorAll('.hair .hair-style');
-            elections.sliders.hair.slides[0].style.display = "block";
-            
-            elections.sliders.clothes.slides = document.querySelectorAll('.clothes .clothes-style');
-            elections.sliders.clothes.slides[0].style.display = "block";
-            
-          }
-          changePicsInit(elem.value);
+          // update slides array to work slider
+          elections.sliders.hair.slides = document.querySelectorAll('.hair .hair-style');
+          elections.sliders.clothes.slides = document.querySelectorAll('.clothes .clothes-style');
+          // show first slide
+          elections.sliders.hair.slides[0].style.display = "block";
+          elections.sliders.clothes.slides[0].style.display = "block";
+          changePersonAppearance(elem.value);
         } 
       });
     });
 
+    /* listen buttons clicking */
     // change skin
-    elections.sliders.skin.prevBtn.addEventListener('click', () => {
-      if (elections.person.sex == "Мужской") {
-        elections.person.skin.style.background = elections.pictures.skin.men[elections.sliders.skin.currentIndex - 1];
-      } else if (elections.person.sex == "Женский") {
-        elections.person.skin.style.background = elections.pictures.skin.women[elections.sliders.skin.currentIndex - 1];
-      }
-    });
-    elections.sliders.skin.nextBtn.addEventListener('click', () => {
-      if (elections.person.sex == "Мужской") {
-        elections.person.skin.style.background = elections.pictures.skin.men[elections.sliders.skin.currentIndex - 1];
-      } else if (elections.person.sex == "Женский") {
-        elections.person.skin.style.background = elections.pictures.skin.women[elections.sliders.skin.currentIndex - 1];
-      }
-    });
+    for (let btn of [elections.sliders.skin.prevBtn, elections.sliders.skin.nextBtn]) {
+      btn.addEventListener('click', () => {
+        if (elections.person.sex == "Мужской") {
+          elections.person.skin.style.background = elections.pictures.skin.men[elections.sliders.skin.currentIndex - 1];
+        } else if (elections.person.sex == "Женский") {
+          elections.person.skin.style.background = elections.pictures.skin.women[elections.sliders.skin.currentIndex - 1];
+        }
+      });
+    }
 
     // change hair
-    elections.sliders.hair.prevBtn.addEventListener('click', () => {
-      if (elections.person.sex == "Мужской") {
-        elections.person.hair.style.background = elections.pictures.hair.men[elections.sliders.hair.currentIndex - 1];
-      } else if (elections.person.sex == "Женский") {
-        elections.person.hair.style.background = elections.pictures.hair.women[elections.sliders.hair.currentIndex - 1];
-      }
-    });
-    elections.sliders.hair.nextBtn.addEventListener('click', () => {
-      if (elections.person.sex == "Мужской") {
-        elections.person.hair.style.background = elections.pictures.hair.men[elections.sliders.hair.currentIndex - 1];
-      } else if (elections.person.sex == "Женский") {
-        elections.person.hair.style.background = elections.pictures.hair.women[elections.sliders.hair.currentIndex - 1];
-      }
-    });
-
+    for (let btn of [elections.sliders.hair.prevBtn, elections.sliders.hair.nextBtn]) {
+      btn.addEventListener('click', () => {
+        if (elections.person.sex == "Мужской") {
+          elections.person.hair.style.background = elections.pictures.hair.men[elections.sliders.hair.currentIndex - 1];
+        } else if (elections.person.sex == "Женский") {
+          elections.person.hair.style.background = elections.pictures.hair.women[elections.sliders.hair.currentIndex - 1];
+        }
+      });
+    }
+    
     // change clothes
-    elections.sliders.clothes.prevBtn.addEventListener('click', () => {
-      if (elections.person.sex == "Мужской") {
-        elections.person.clothes.style.background = elections.pictures.clothes.men[elections.sliders.clothes.currentIndex - 1];
-      } else if (elections.person.sex == "Женский") {
-        elections.person.clothes.style.background = elections.pictures.clothes.women[elections.sliders.clothes.currentIndex - 1];
-      }
-    });
-    elections.sliders.clothes.nextBtn.addEventListener('click', () => {
-      if (elections.person.sex == "Мужской") {
-        elections.person.clothes.style.background = elections.pictures.clothes.men[elections.sliders.clothes.currentIndex - 1];
-      } else if (elections.person.sex == "Женский") {
-        elections.person.clothes.style.background = elections.pictures.clothes.women[elections.sliders.clothes.currentIndex - 1];
-      }
-    });
-
+    for (let btn of [elections.sliders.clothes.prevBtn, elections.sliders.clothes.nextBtn]) {
+      btn.addEventListener('click', () => {
+        if (elections.person.sex == "Мужской") {
+          elections.person.clothes.style.background = elections.pictures.clothes.men[elections.sliders.clothes.currentIndex - 1];
+        } else if (elections.person.sex == "Женский") {
+          elections.person.clothes.style.background = elections.pictures.clothes.women[elections.sliders.clothes.currentIndex - 1];
+        }
+      });
+    }
+    
   }
 
-  changeBody(sex);
-
-  function createCandidateCard() {
+  function createNewCandidateCard() {
+    // remove active main card
     for (let elem of mainCards.children) {
       elem.classList.remove('main-cards-item-active');
     };
@@ -154,7 +137,7 @@ window.addEventListener('DOMContentLoaded', function() {
     let firstCandidate = mainCards.children[0];
     
     firstCandidate.insertAdjacentHTML('afterend', 
-    `<div class="main-cards-item main-cards-item-active">
+    `<div class="main-cards-item">
       <div class="candidate-block">
           <div class="person consruct">
             <div id="person-skin" class="person-skin"></div>
@@ -179,7 +162,7 @@ window.addEventListener('DOMContentLoaded', function() {
       <div class="bio">${elections.person.bio}</div>
     </div>`);
 
-    // central card
+    // get person node and change appearance
     const person = mainBlock.querySelector('.person'),
     personSkin = person.querySelector('.person-skin'),
     personClothes = person.querySelector('.person-clothes'),
@@ -189,13 +172,18 @@ window.addEventListener('DOMContentLoaded', function() {
     personClothes.style.background = elections.person.hair.style.background;
     personHair.style.background = elections.person.clothes.style.background;
 
-    let resultCount = document.querySelectorAll('.result-count'),
-        progressBar = document.querySelectorAll('.progress-bar');
+    // reset all counts and progress bars
+    resetResults();
     
-    resultCount.forEach((elem) => elem.textContent = "0%");
-    progressBar.forEach((elem) => elem.style.height = 0);
   }
 
+
+  // run slider
+  slider();
+  // run sex input and btns listening
+  changeBody();
+
+  /* Listen buttons clicking */
   popupBtn.addEventListener('click', () => {
     for (let elem of [mainBlock, overlayBlock]) {
       hide(elem);
@@ -211,16 +199,32 @@ window.addEventListener('DOMContentLoaded', function() {
   });
 
   readyBtn.addEventListener('click', () => {
+    createNewCandidateCard();
+
     hide(customBlock);
     show(mainBlock);
-    createCandidateCard();
     mainBlock.classList.add('animated', 'fadeInDown');
   });
 
   resetBtn.addEventListener('click', () => {
-    let card = document.querySelector('.main-cards-item-active');
+    // get central custom card and remove it
+    let card = document.querySelectorAll('.main-cards-item')[1];
     card.parentNode.removeChild(card);
+
     hide(mainBlock);
     show(customBlock, 'flex');
+
+    // reset voting
+    elections.votingHolded = false;
+    elections.crimeMaked = false;
   });
-});
+
+  votingBtn.addEventListener('click', () => {
+    elections.votingHolded = voting(elections.votingHolded);
+  });
+
+  crimeBtn.addEventListener('click', () => {
+    elections.crimeMaked = crime(elections.votingHolded,
+                                elections.crimeMaked);
+  });
+}); 

@@ -1,4 +1,6 @@
 let elections = {
+  votingHolded: false,
+  crimeMaked: false,
   person: {
     name: '',
     age: null,
